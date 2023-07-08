@@ -1,0 +1,5 @@
+Instructions:
+1) Install npm via Brew
+2) Install Unity 2020.3.33f1 (check with repository to verify)
+3) python3 build.py -p GameKit Core -k all
+4) From Build folder import tar Core, then GameKit.
