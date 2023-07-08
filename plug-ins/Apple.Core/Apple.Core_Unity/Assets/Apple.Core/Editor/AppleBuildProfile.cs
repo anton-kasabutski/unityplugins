@@ -11,9 +11,7 @@ namespace Apple.Core
     [CreateAssetMenu(menuName = "Apple/Build/Apple Build Profile")]
     public class AppleBuildProfile : ScriptableObject
     {
-        public const string BuildSettingsPath = "Assets/Apple.Core/Editor/";
         public const string DefaultAsset = "DefaultAppleBuildProfile.asset";
-        public const string DefaultBuildSettingsAssetPath = BuildSettingsPath + DefaultAsset;
 
         public Dictionary<string, AppleBuildStep> buildSteps = new Dictionary<string, AppleBuildStep>();
 
@@ -34,24 +32,24 @@ namespace Apple.Core
         /// </summary>
         public static AppleBuildProfile DefaultProfile()
         {
-            if (!Directory.Exists(BuildSettingsPath))
-            {
-                Debug.Log($"Failed to locate path {BuildSettingsPath}. Creating");
-
-                if (!Directory.Exists("Assets/Apple.Core/"))
-                {
-                    AssetDatabase.CreateFolder("Assets", "Apple.Core");
+            var folders = new List<string>() { "Assets", "Packages", "Apple.Core", "Editor" };
+            var fullPath = Path.Combine(folders.ToArray());
+            for (int i = 1; i < folders.Count; i++) {
+                var subPathFolders = folders.GetRange(0, i);
+                var subPath = Path.Combine(folders.GetRange(0, i).ToArray());
+                if (!Directory.Exists(subPath)) {
+                    Debug.Log($"Failed to locate path {subPath}. Creating");
+                    AssetDatabase.CreateFolder(Path.Combine(subPathFolders.GetRange(0, subPathFolders.Count - 1).ToArray()), subPathFolders[subPathFolders.Count - 1]);
                 }
-
-                AssetDatabase.CreateFolder("Assets/Apple.Core", "Editor");
             }
 
             AppleBuildProfile defaultProfile = null;
             var profs = Array.Empty<Object>();
-            if (File.Exists(DefaultBuildSettingsAssetPath))
+            var defAssetPath = Path.Combine(fullPath, DefaultAsset);
+            if (File.Exists(defAssetPath))
             {
-                profs = AssetDatabase.LoadAllAssetsAtPath(DefaultBuildSettingsAssetPath);
-                defaultProfile = (AppleBuildProfile)AssetDatabase.LoadMainAssetAtPath(DefaultBuildSettingsAssetPath);
+                profs = AssetDatabase.LoadAllAssetsAtPath(defAssetPath);
+                defaultProfile = (AppleBuildProfile)AssetDatabase.LoadMainAssetAtPath(defAssetPath);
             }
 
             if (defaultProfile is null)
@@ -59,7 +57,7 @@ namespace Apple.Core
                 Debug.Log("Failed to find previous default build profile. Creating a new one.");
                 defaultProfile = CreateInstance<AppleBuildProfile>();
 
-                AssetDatabase.CreateAsset(defaultProfile, DefaultBuildSettingsAssetPath);
+                AssetDatabase.CreateAsset(defaultProfile, defAssetPath);
 
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
@@ -67,8 +65,8 @@ namespace Apple.Core
                 defaultProfile.ResolveBuildSteps();
                 AssetDatabase.SaveAssets();
 
-                AssetDatabase.SetMainObject(defaultProfile, DefaultBuildSettingsAssetPath);
-                AssetDatabase.ImportAsset(DefaultBuildSettingsAssetPath);
+                AssetDatabase.SetMainObject(defaultProfile, defAssetPath);
+                AssetDatabase.ImportAsset(defAssetPath);
             }
             else
             {
