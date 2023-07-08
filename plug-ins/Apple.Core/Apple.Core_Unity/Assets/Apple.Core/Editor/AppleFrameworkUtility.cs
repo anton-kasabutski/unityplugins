@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR_OSX
+﻿#if UNITY_EDITOR_OSX && (UNITY_IOS || UNITY_TVOS || UNITY_STANDALONE_OSX)
 using System;
 using System.IO;
 using UnityEditor;
@@ -36,11 +36,26 @@ namespace Apple.Core
             foreach (string currGUID in results)
             {
                 string libraryPath = AssetDatabase.GUIDToAssetPath(currGUID);
+
                 string[] folders = libraryPath.Split('/');
                 if (Array.IndexOf(folders, platformString) > -1)
                 {
                     return libraryPath;
                 }
+            }
+
+            // try without the .framework, Unity.2022 AssetDatabase.FindAssets fails with ".frameworks" 
+            if (libraryName.EndsWith(".framework")) {
+                string libraryNameWithoutFramework = libraryName.Substring(0, libraryName.LastIndexOf(".framework"));
+                results = AssetDatabase.FindAssets(libraryNameWithoutFramework);
+                foreach (string currGUID in results) {
+                    string libraryPath = AssetDatabase.GUIDToAssetPath(currGUID);
+                    string[] folders = libraryPath.Split('/');
+                    if (Array.IndexOf(folders, platformString) > -1) {
+                        return libraryPath;
+                    }
+                }
+
             }
 
             return string.Empty;
@@ -136,7 +151,7 @@ namespace Apple.Core
             {
                 var expectedInstallPath = source.Substring(source.LastIndexOf(searchString) + searchString.Length);
                 Debug.Log($"CopyAndEmbed - Expected install path for {frameworkName}: {expectedInstallPath}");
-                fileGuid = pbxProject.FindFileGuidByProjectPath(Path.Combine("Frameworks", expectedInstallPath));
+                fileGuid = pbxProject.FindFileGuidByProjectPath(Path.Combine(frameworkName.EndsWith(".a") ? "Libraries" : "Frameworks", expectedInstallPath));
                 if (string.IsNullOrEmpty(fileGuid))
                 {
                     fileGuid = pbxProject.FindFileGuidByProjectPath(Path.Combine("Libraries", expectedInstallPath));

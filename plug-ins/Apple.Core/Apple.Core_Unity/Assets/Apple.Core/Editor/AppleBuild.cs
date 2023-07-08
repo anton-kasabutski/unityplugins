@@ -1,3 +1,4 @@
+#if UNITY_EDITOR_OSX && (UNITY_IOS || UNITY_TVOS || UNITY_STANDALONE_OSX)
 using System.IO;
 using System.Text.RegularExpressions;
 using UnityEditor;
@@ -24,7 +25,7 @@ namespace Apple.Core
                 pathToBuiltProject += ".app";
             }
 
-            #region Begin Post Process
+#region Begin Post Process
 
             Debug.Log($"AppleBuild: OnBeginPostProcess begin");
             Debug.Log($"AppleBuild: Found {appleBuildProfile.buildSteps.Count} build steps.");
@@ -45,9 +46,9 @@ namespace Apple.Core
 
             Debug.Log($"AppleBuild: OnBeginPostProcess end.");
 
-            #endregion // Begin Post Process
+#endregion // Begin Post Process
 
-            #region Process info.plist
+#region Process info.plist
 
             if (appleBuildProfile.AutomateInfoPlist)
             {
@@ -111,9 +112,9 @@ namespace Apple.Core
                 Debug.Log($"AppleBuild: OnProcessInfoPlist end...");
             }
 
-            #endregion // Process info.plist
+#endregion // Process info.plist
 
-            #region Process Entitlements
+#region Process Entitlements
 
             var pbxProject = GetPbxProject(buildTarget, pathToBuiltProject);
             var pbxProjectPath = GetPbxProjectPath(buildTarget, pathToBuiltProject);
@@ -181,9 +182,9 @@ namespace Apple.Core
                 Debug.Log($"AppleBuild: OnProcessEntitlements end.");
             }
 
-            #endregion // Process Entitlements
+#endregion // Process Entitlements
 
-            #region Process Frameworks
+#region Process Frameworks
 
             Debug.Log($"AppleBuild: OnProcessFrameworks begin...");
 
@@ -203,9 +204,9 @@ namespace Apple.Core
 
             Debug.Log($"AppleBuild: OnProcessFrameworks end.");
 
-            #endregion // Process Frameworks
+#endregion // Process Frameworks
 
-            #region Finalize Post Process
+#region Finalize Post Process
 
             Debug.Log($"AppleBuild: OnFinalizePostProcess begin...");
 
@@ -220,7 +221,7 @@ namespace Apple.Core
 
             Debug.Log($"AppleBuild: OnFinalizePostProcess end.");
 
-            #endregion // Finalize Post Process
+#endregion // Finalize Post Process
 
         }
 
@@ -253,7 +254,7 @@ namespace Apple.Core
             Debug.Log($"AppleBuild: Fixing entitlements formatting end.");
         }
 
-        #region Public Utility Methods
+#region Public Utility Methods
 
         /// <summary>
         /// Returns true if the Unity project settings are configured to create an Xcode project for the StandaloneOSX build target
@@ -418,7 +419,9 @@ namespace Apple.Core
             Debug.Log($"AppleBuild: ProcessExportPlistOptions end.");
         }
 
-        #endregion // Public Utility Methods
+#endregion // Public Utility Methods
 
     }
 }
+
+#endif
